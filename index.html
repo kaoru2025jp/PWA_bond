@@ -28,13 +28,39 @@
   caption { font-weight:700; padding:12px 0; color:#444; }
   th, td { padding:10px 12px; text-align:center; border-bottom:1px solid #eee; }
   th { background:linear-gradient(135deg,#4a90e2,#357ab7); color:#fff; font-weight:700; }
-  td.input { font-weight:700; color:#0d47a1; background:#e3f2fd; }
+  td.input { font-weight:700; color:#0d47a1; background:#e3f2fd; border-left:4px solid #64b5f6; border-right:4px solid #64b5f6; }
   td.middle { font-weight:700; color:#e65100; background:#fff3e0; }
-  td.final { font-weight:700; color:#1a237e; background:#e8eaf6; }
-  .explanation, .result-box {
-    background:#fff; padding:16px; border-radius:8px;
-    box-shadow:0 4px 8px rgba(0,0,0,0.05); margin:20px 0;
+  td.final { font-weight:700; color:#1a237e; background:#e8eaf6; border-top:2px solid #5c6bc0; }
+  .explanation { background:#fff; padding:16px; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.05); margin:20px 0; }
+  .equation-box {
+    text-align:center;
+    margin:20px 0;
+    padding:20px;
+    background:linear-gradient(135deg,#f0f4ff,#e8eaf6);
+    border-radius:12px;
+    box-shadow:0 4px 8px rgba(0,0,0,0.1);
   }
+  .equation {
+    font-size:24px;
+    font-weight:700;
+    color:#1a237e;
+  }
+  .fraction {
+    display:inline-block;
+    text-align:center;
+    vertical-align:middle;
+    margin:0 6px;
+  }
+  .fraction .top {
+    display:block;
+    border-bottom:2px solid #1a237e;
+    padding:0 6px;
+  }
+  .fraction .bottom {
+    display:block;
+    padding:0 6px;
+  }
+  .result-box { margin-top:20px; padding:14px; background:#fff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.08); }
 </style>
 </head>
 
@@ -42,6 +68,7 @@
 <div class="container">
   <h1>計算と方程式の適用（STOCKOFF23）</h1>
 
+  <!-- 入力フォーム 1 -->
   <form id="calcForm1">
     <div class="form-row">
       <label for="B">B</label>
@@ -64,14 +91,29 @@
 
   <div id="output1"></div>
 
+  <!-- 説明 -->
   <div class="explanation" id="explanation" style="display:none;">
     <h2>方程式の背景</h2>
-    <p>① オプション価格の流動性は、時として銘柄の現在価値より高いことがあります。</p>
+    <p>① オプション価格の流動性は、時として銘柄の現在価値より高いことがあります。分子 (O1 - O2) は、その差異を客観的に示すための指標です。</p>
+    <p>② 市場の流動性が適切に機能している場合、市場の占有率で割り引いた値は、銘柄の現在価値に限りなく一致する必要があります。</p>
+    <p>③ 方程式の分母 (0.95×K - 1) はその状況を測定するバロメーターであり、流動性のポジションと同様の結論を導き出す役割を持ちます。</p>
+    <div class="equation-box">
+      <div class="equation">
+        <span class="fraction">
+          <span class="top">(O1 - O2)</span>
+          <span class="bottom">(0.95 × K - 1)</span>
+        </span>
+        = SX
+      </div>
+    </div>
   </div>
 
+  <!-- 入力フォーム 2 -->
   <form id="calcForm2" style="display:none;">
-    <label for="K">K</label>
-    <input type="number" id="K" step="any" required>
+    <div class="form-row">
+      <label for="K">K</label>
+      <input type="number" id="K" step="any" required>
+    </div>
     <button type="submit">SXを計算する</button>
   </form>
 
@@ -100,10 +142,20 @@ document.getElementById("calcForm1").addEventListener("submit", function(e){
 
   O1 = (B - S) / T1;
   O2 = (B - S) / T2;
+  const D = B - S - O1 - O2;
 
   document.getElementById("output1").innerHTML = `
-    <p>O1 = ${O1}</p>
-    <p>O2 = ${O2}</p>
+    <table>
+      <caption>入力値と計算結果</caption>
+      <tr><th>項目</th><th>値</th></tr>
+      <tr><td>B</td><td class="input">${escapeHtml(B)}</td></tr>
+      <tr><td>S</td><td class="input">${escapeHtml(S)}</td></tr>
+      <tr><td>T1</td><td class="input">${escapeHtml(T1)}</td></tr>
+      <tr><td>T2</td><td class="input">${escapeHtml(T2)}</td></tr>
+      <tr><td>O1 = (B-S)/T1</td><td class="middle">${O1}</td></tr>
+      <tr><td>O2 = (B-S)/T2</td><td class="middle">${O2}</td></tr>
+      <tr><td>D = B-S-O1-O2</td><td class="final">${D}</td></tr>
+    </table>
   `;
 
   document.getElementById("explanation").style.display="block";
@@ -114,11 +166,16 @@ document.getElementById("calcForm2").addEventListener("submit", function(e){
   e.preventDefault();
   const K = Number(document.getElementById("K").value);
   const SX = (O1 - O2) / (0.95*K - 1);
-  document.getElementById("output2").innerHTML =
-    `<div class="result-box">SX = ${SX.toFixed(4)}</div>`;
+
+  document.getElementById("output2").innerHTML = `
+    <div class="result-box">
+      <h3>SXの計算結果</h3>
+      <p>SX = ${SX.toFixed(4)}</p>
+    </div>
+  `;
 });
 
-// Service Worker 登録
+// Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
