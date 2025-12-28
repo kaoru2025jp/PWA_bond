@@ -42,61 +42,81 @@
 <div class="container">
   <h1>計算と方程式の適用（STOCKOFF23）</h1>
 
-  <!-- 入力フォーム -->
   <form id="calcForm1">
     <div class="form-row">
-      <label>B</label>
-      <input type="number" id="B" required>
+      <label for="B">B</label>
+      <input type="number" id="B" step="any" required>
     </div>
     <div class="form-row">
-      <label>S</label>
-      <input type="number" id="S" required>
+      <label for="S">S</label>
+      <input type="number" id="S" step="any" required>
     </div>
     <div class="form-row">
-      <label>T1</label>
-      <input type="number" id="T1" required>
+      <label for="T1">T1</label>
+      <input type="number" id="T1" step="any" required>
     </div>
     <div class="form-row">
-      <label>T2</label>
-      <input type="number" id="T2" required>
+      <label for="T2">T2</label>
+      <input type="number" id="T2" step="any" required>
     </div>
-    <button>計算する</button>
+    <button type="submit">計算する</button>
   </form>
 
   <div id="output1"></div>
 
   <div class="explanation" id="explanation" style="display:none;">
     <h2>方程式の背景</h2>
-    <p>（O1 − O2）を流動性の差異指標として用い、市場整合性を測定します。</p>
+    <p>① オプション価格の流動性は、時として銘柄の現在価値より高いことがあります。</p>
   </div>
 
   <form id="calcForm2" style="display:none;">
-    <label>K</label>
-    <input type="number" id="K" required>
-    <button>SXを計算</button>
+    <label for="K">K</label>
+    <input type="number" id="K" step="any" required>
+    <button type="submit">SXを計算する</button>
   </form>
 
   <div id="output2"></div>
 </div>
 
 <script>
-let O1=0,O2=0;
+function escapeHtml(s){
+  return s===null||s===undefined?"":String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
 
-document.getElementById("calcForm1").onsubmit=e=>{
-  e.preventDefault();
-  const B=+B.value,S=+S.value,T1=+T1.value,T2=+T2.value;
-  O1=(B-S)/T1; O2=(B-S)/T2;
-  output1.innerHTML=`O1=${O1}<br>O2=${O2}`;
-  explanation.style.display="block";
-  calcForm2.style.display="block";
-};
+let O1=0, O2=0;
 
-document.getElementById("calcForm2").onsubmit=e=>{
+document.getElementById("calcForm1").addEventListener("submit", function(e){
   e.preventDefault();
-  const K=+K.value;
-  const SX=(O1-O2)/(0.95*K-1);
-  output2.innerHTML=`<div class="result-box">SX=${SX.toFixed(4)}</div>`;
-};
+
+  const B  = Number(document.getElementById("B").value);
+  const S  = Number(document.getElementById("S").value);
+  const T1 = Number(document.getElementById("T1").value);
+  const T2 = Number(document.getElementById("T2").value);
+
+  O1 = (B - S) / T1;
+  O2 = (B - S) / T2;
+
+  document.getElementById("output1").innerHTML = `
+    <p>O1 = ${O1}</p>
+    <p>O2 = ${O2}</p>
+  `;
+
+  document.getElementById("explanation").style.display="block";
+  document.getElementById("calcForm2").style.display="block";
+});
+
+document.getElementById("calcForm2").addEventListener("submit", function(e){
+  e.preventDefault();
+  const K = Number(document.getElementById("K").value);
+  const SX = (O1 - O2) / (0.95*K - 1);
+  document.getElementById("output2").innerHTML =
+    `<div class="result-box">SX = ${SX.toFixed(4)}</div>`;
+});
 
 // Service Worker 登録
 if ('serviceWorker' in navigator) {
