@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>STOCKOFF23 — 計算と方程式</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a90e2">
+
+<style>
+  body {
+    font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    background:#f9f9f9; padding:20px; color:#333;
+  }
+  h1 { text-align:center; color:#222; margin-bottom:16px; }
+  .container { max-width:720px; margin:0 auto; }
+  form { background:#fff; padding:16px; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.08); margin-bottom:20px; }
+  .form-row { margin-bottom:12px; }
+  label { display:block; font-weight:600; margin-bottom:4px; }
+  input[type="number"] { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; }
+  button { margin-top:10px; padding:8px 14px; background:#4a90e2; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+  button:hover { background:#357ab7; }
+  table {
+    border-collapse:collapse; margin:16px auto; width:100%; background:#fff;
+    box-shadow:0 4px 8px rgba(0,0,0,0.08); border-radius:8px; overflow:hidden;
+  }
+  caption { font-weight:700; padding:12px 0; color:#444; }
+  th, td { padding:10px 12px; text-align:center; border-bottom:1px solid #eee; }
+  th { background:linear-gradient(135deg,#4a90e2,#357ab7); color:#fff; font-weight:700; }
+  td.input { font-weight:700; color:#0d47a1; background:#e3f2fd; }
+  td.middle { font-weight:700; color:#e65100; background:#fff3e0; }
+  td.final { font-weight:700; color:#1a237e; background:#e8eaf6; }
+  .explanation, .result-box {
+    background:#fff; padding:16px; border-radius:8px;
+    box-shadow:0 4px 8px rgba(0,0,0,0.05); margin:20px 0;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>計算と方程式の適用（STOCKOFF23）</h1>
+
+  <!-- 入力フォーム -->
+  <form id="calcForm1">
+    <div class="form-row">
+      <label>B</label>
+      <input type="number" id="B" required>
+    </div>
+    <div class="form-row">
+      <label>S</label>
+      <input type="number" id="S" required>
+    </div>
+    <div class="form-row">
+      <label>T1</label>
+      <input type="number" id="T1" required>
+    </div>
+    <div class="form-row">
+      <label>T2</label>
+      <input type="number" id="T2" required>
+    </div>
+    <button>計算する</button>
+  </form>
+
+  <div id="output1"></div>
+
+  <div class="explanation" id="explanation" style="display:none;">
+    <h2>方程式の背景</h2>
+    <p>（O1 − O2）を流動性の差異指標として用い、市場整合性を測定します。</p>
+  </div>
+
+  <form id="calcForm2" style="display:none;">
+    <label>K</label>
+    <input type="number" id="K" required>
+    <button>SXを計算</button>
+  </form>
+
+  <div id="output2"></div>
+</div>
+
+<script>
+let O1=0,O2=0;
+
+document.getElementById("calcForm1").onsubmit=e=>{
+  e.preventDefault();
+  const B=+B.value,S=+S.value,T1=+T1.value,T2=+T2.value;
+  O1=(B-S)/T1; O2=(B-S)/T2;
+  output1.innerHTML=`O1=${O1}<br>O2=${O2}`;
+  explanation.style.display="block";
+  calcForm2.style.display="block";
+};
+
+document.getElementById("calcForm2").onsubmit=e=>{
+  e.preventDefault();
+  const K=+K.value;
+  const SX=(O1-O2)/(0.95*K-1);
+  output2.innerHTML=`<div class="result-box">SX=${SX.toFixed(4)}</div>`;
+};
+
+// Service Worker 登録
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
